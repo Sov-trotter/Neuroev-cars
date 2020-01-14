@@ -1,31 +1,67 @@
 class Particle {
-    constructor(x, y ) {
-        this.pos = createVector(x, y);
+    constructor(brain ) {
+        this.dead = false;
+        this.finish = false;
+        this.fitness = 0;
+        this.pos = createVector(start.x, start.y);
         this.vel = createVector();
         this.acc = createVector();
         this.maxspeed = 3;
         this.sight = 50;
         this.rays = [];
-        for(let a = 0; a < 360 ; a += 45) {
+        for(let a = 0; a > -180 ; a -= 22.5) {
             this.rays.push(new Ray(this.pos, radians(a)));
 
         }
-        this.brain = new NeuralNetwork(this.rays.length, this.rays.length, 1);
+        if(this.brain){
+            this.brain = brain.copy();
+        } else {
+            this.brain = new NeuralNetwork(this.rays.length, this.rays.length, 1);
+        }
     }
+           
 
     applyForce(force){
         this.acc.add(force);
     }
 
     update()
-    {
+    {   
+        if(!this.dead && !this.finish){
         this.pos.add(this.vel);
         this.vel.add(this.acc);
         this.vel.limit(this.maxspeed);
         this.acc.set(0,0)
     }
+}
+check(target){
+    const d = p5.Vector.dist(this.pos, target);
+    if(d<10){
+        this.finish = true;
+    }
+}
+calculateFitness(target){
+    if(this.finish){
+        this.fitness = 1;
+    }
+    else{
+        const d = p5.Vector.dist(this.pos, target);
+        this.fitness = constrain(1/d , 0, 1);
+    }
+}
 
-    look(walls){
+
+dispose(){
+    this.brain.dispose();
+}
+
+
+
+mutate(){
+    this.brain.mutate(mutationRate);
+}
+
+    look(walls, target){
 
         const inputs = [];
          for(let i = 0;i < this.rays.length; i++ ){
@@ -46,10 +82,11 @@ class Particle {
                     
                 }
 
-                // if(record < 2){
-                //     console.log("hit wall");
+                if(record < 2){
+                    
+                    this.dead = true;
 
-                // }
+                }
                 inputs[i] = map(record, 0 , 50, 1, 0);
                 
                 
