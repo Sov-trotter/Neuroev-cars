@@ -1,10 +1,11 @@
+
 function nextGeneration() {
   console.log('next generation');
   calculateFitness(end);
-  for (let i = 0; i < total; i++) {
+  for (let i = 0; i < TOTAL; i++) {
     population[i] = pickOne();
   }
-  for (let i = 0; i < total; i++) {
+  for (let i = 0; i < TOTAL; i++) {
     savedParticles[i].dispose();
   }
   savedParticles = [];
